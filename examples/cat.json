@@ -1,0 +1,658 @@
+{
+  "palette": [
+    {
+      "char": "o",
+      "hex": "#e8a04e"
+    },
+    {
+      "char": "s",
+      "hex": "#c07c32"
+    },
+    {
+      "char": "w",
+      "hex": "#ffe9c9"
+    },
+    {
+      "char": "d",
+      "hex": "#5d3312"
+    },
+    {
+      "char": "k",
+      "hex": "#1a1a1a"
+    },
+    {
+      "char": "p",
+      "hex": "#e07f8f"
+    },
+    {
+      "char": "g",
+      "hex": "#7fd4a8"
+    }
+  ],
+  "outline": "d",
+  "base": [
+    {
+      "type": "ellipse",
+      "color": "o",
+      "points": [
+        14,
+        18,
+        8.5,
+        4.6
+      ],
+      "width": 1
+    },
+    {
+      "type": "ellipse",
+      "color": "o",
+      "points": [
+        8,
+        18,
+        5.2,
+        4.8
+      ],
+      "width": 1
+    },
+    {
+      "type": "ellipse",
+      "color": "o",
+      "points": [
+        20,
+        18,
+        4.6,
+        4.4
+      ],
+      "width": 1
+    },
+    {
+      "type": "rect",
+      "color": "o",
+      "points": [
+        18,
+        13,
+        21,
+        18
+      ],
+      "width": 1
+    },
+    {
+      "type": "triangle",
+      "color": "o",
+      "points": [
+        18,
+        2,
+        16.5,
+        9,
+        21.5,
+        9
+      ],
+      "width": 1
+    },
+    {
+      "type": "triangle",
+      "color": "o",
+      "points": [
+        27,
+        2,
+        24.5,
+        9,
+        29,
+        9
+      ],
+      "width": 1
+    },
+    {
+      "type": "ellipse",
+      "color": "o",
+      "points": [
+        23,
+        11,
+        5.2,
+        4.6
+      ],
+      "width": 1
+    },
+    {
+      "type": "ellipse",
+      "color": "w",
+      "points": [
+        26,
+        13.5,
+        3.0,
+        2.4
+      ],
+      "width": 1
+    }
+  ],
+  "details": [
+    {
+      "type": "ellipse",
+      "color": "g",
+      "points": [
+        22.5,
+        10.5,
+        1.6,
+        1.4
+      ],
+      "width": 1
+    },
+    {
+      "type": "rect",
+      "color": "k",
+      "points": [
+        22,
+        10,
+        23,
+        10
+      ],
+      "width": 1
+    },
+    {
+      "type": "rect",
+      "color": "p",
+      "points": [
+        27,
+        13,
+        27,
+        13
+      ],
+      "width": 1
+    },
+    {
+      "type": "rect",
+      "color": "p",
+      "points": [
+        17,
+        3,
+        17,
+        6
+      ],
+      "width": 1
+    },
+    {
+      "type": "rect",
+      "color": "p",
+      "points": [
+        27,
+        3,
+        27,
+        6
+      ],
+      "width": 1
+    }
+  ],
+  "frames": [
+    {
+      "behind": [
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            9,
+            19,
+            9.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            8.0,
+            25,
+            11.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            20,
+            19,
+            20.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            19.0,
+            25,
+            22.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "bezier",
+          "color": "o",
+          "points": [
+            7,
+            19,
+            -1,
+            11,
+            7,
+            3
+          ],
+          "width": 2
+        }
+      ],
+      "front": [
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            9,
+            19,
+            9.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            8.0,
+            26,
+            11.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            20,
+            19,
+            20.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            19.0,
+            26,
+            22.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "ellipse",
+          "color": "s",
+          "points": [
+            15,
+            21,
+            6.0,
+            1.6
+          ],
+          "width": 1
+        }
+      ]
+    },
+    {
+      "behind": [
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            9,
+            19,
+            6.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            5.0,
+            25,
+            8.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            20,
+            19,
+            23.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            22.0,
+            25,
+            25.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "bezier",
+          "color": "o",
+          "points": [
+            7,
+            19,
+            -1,
+            11,
+            7,
+            3
+          ],
+          "width": 2
+        }
+      ],
+      "front": [
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            9,
+            19,
+            12.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            11.0,
+            26,
+            14.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            20,
+            19,
+            17.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            16.0,
+            26,
+            19.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "ellipse",
+          "color": "s",
+          "points": [
+            15,
+            21,
+            6.0,
+            1.6
+          ],
+          "width": 1
+        }
+      ]
+    },
+    {
+      "behind": [
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            9,
+            19,
+            9.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            8.0,
+            25,
+            11.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            20,
+            19,
+            20.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            19.0,
+            25,
+            22.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "bezier",
+          "color": "o",
+          "points": [
+            7,
+            19,
+            -1,
+            11,
+            7,
+            3
+          ],
+          "width": 2
+        }
+      ],
+      "front": [
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            9,
+            19,
+            9.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            8.0,
+            26,
+            11.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            20,
+            19,
+            20.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            19.0,
+            26,
+            22.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "ellipse",
+          "color": "s",
+          "points": [
+            15,
+            21,
+            6.0,
+            1.6
+          ],
+          "width": 1
+        }
+      ]
+    },
+    {
+      "behind": [
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            9,
+            19,
+            12.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            11.0,
+            25,
+            14.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "s",
+          "points": [
+            20,
+            19,
+            17.0,
+            25
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "s",
+          "points": [
+            16.0,
+            25,
+            19.0,
+            26
+          ],
+          "width": 1
+        },
+        {
+          "type": "bezier",
+          "color": "o",
+          "points": [
+            7,
+            19,
+            -1,
+            11,
+            7,
+            3
+          ],
+          "width": 2
+        }
+      ],
+      "front": [
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            9,
+            19,
+            6.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            5.0,
+            26,
+            8.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "line",
+          "color": "o",
+          "points": [
+            20,
+            19,
+            23.0,
+            26
+          ],
+          "width": 3
+        },
+        {
+          "type": "rect",
+          "color": "w",
+          "points": [
+            22.0,
+            26,
+            25.0,
+            27
+          ],
+          "width": 1
+        },
+        {
+          "type": "ellipse",
+          "color": "s",
+          "points": [
+            15,
+            21,
+            6.0,
+            1.6
+          ],
+          "width": 1
+        }
+      ]
+    }
+  ]
+}

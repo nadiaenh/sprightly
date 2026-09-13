@@ -1,0 +1,40 @@
+name: Integration
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-sprite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # persist-credentials stays default (true): this job pushes the README update below.
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Generate a sprite against the deployed worker
+        id: generate
+        env:
+          SPRIGHTLY_URL: ${{ secrets.SPRIGHTLY_URL }}
+          SPRIGHTLY_API_KEY: ${{ secrets.SPRIGHTLY_API_KEY }}
+        run: python tests/generate_sprite.py
+
+      - name: Record this week's demo in the README
+        if: steps.generate.outputs.gif_url != ''
+        run: |
+          python scripts/update_demo.py "${{ steps.generate.outputs.gif_url }}" "${{ steps.generate.outputs.prompt }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet README.md || {
+            git add README.md
+            git commit -m "docs: refresh demo GIF from weekly integration run [skip ci]"
+            git push
+          }

@@ -1,0 +1,72 @@
+name: Deploy worker
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Check required secrets
+        id: check
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN not set - skipping deploy"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        if: steps.check.outputs.ready == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.check.outputs.ready == 'true'
+        run: pnpm install
+
+      - name: Typecheck
+        if: steps.check.outputs.ready == 'true'
+        run: pnpm run typecheck
+
+      - name: Deploy
+        id: deploy
+        if: steps.check.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          pnpm exec wrangler deploy 2>&1 | tee deploy.log
+          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Publish deployed URL
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          {
+            echo "### sprightly deployed"
+            echo ""
+            echo '```sh'
+            echo "export SPRIGHTLY_URL=${{ steps.deploy.outputs.url }}"
+            echo "export SPRIGHTLY_API_KEY=<your key>"
+            echo 'python main.py "a walking cat"'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

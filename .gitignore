@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.dev.vars
+node_modules/
+.wrangler/
+dist/
+*.gif
+!assets/*.gif
+.DS_Store

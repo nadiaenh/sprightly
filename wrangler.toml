@@ -1,0 +1,17 @@
+name = "sprightly"
+main = "worker/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Public R2 URL that generated GIFs are served from. setup.sh fills this in
+# after enabling public access on the bucket.
+[vars]
+PUBLIC_BASE_URL = "https://pub-04c53b629290498c9ca208af58491e0b.r2.dev"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "sprightly-gifs"
+
+# Secrets (set via `wrangler secret put`, never committed):
+#   ANTHROPIC_API_KEY - calls the Claude API
+#   SPRIGHTLY_API_KEY - the x-api-key callers must present
