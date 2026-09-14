@@ -23,4 +23,6 @@ python3 main.py "a walking cat"
 
 ## Demo
 
+<p align="center"><img src="examples/cat-2.gif" alt="an orange frog" width="256"></p>
+
 <p align="center"><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/5fa3dd05-e712-4306-aadf-530e56ce6b33.gif" alt="an orange frog" width="256"></p>

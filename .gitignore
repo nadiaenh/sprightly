@@ -6,6 +6,4 @@ __pycache__/
 node_modules/
 .wrangler/
 dist/
-*.gif
-!assets/*.gif
 .DS_Store
