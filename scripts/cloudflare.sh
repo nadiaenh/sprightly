@@ -14,8 +14,7 @@ wrangler whoami >/dev/null 2>&1 || wrangler login
 ok "authenticated to cloudflare"
 
 if [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-  CLOUDFLARE_ACCOUNT_ID=$(wrangler whoami 2>/dev/null \
-    | grep -oE '[0-9a-f]{32}' | head -1 || true)
+  CLOUDFLARE_ACCOUNT_ID=$(wrangler whoami 2>/dev/null | grep -oE '[0-9a-f]{32}' | head -1 || true)
 fi
 if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
   info "Account id: open the Cloudflare dashboard, press CMD+K, and type"
@@ -39,9 +38,7 @@ else
   info "for a payment method even though this project fits the \$0 free tier."
   info "  $r2_home"
   read -rp "    Press enter once R2 is enabled to retry... " _
-  wrangler r2 bucket create "$bucket" >/dev/null 2>&1 \
-    && ok "created r2 bucket $bucket" \
-    || fail "still could not create bucket '$bucket'"
+  wrangler r2 bucket create "$bucket" >/dev/null 2>&1 && ok "created r2 bucket $bucket" || fail "still could not create bucket '$bucket'"
 fi
 
 if ! grep -qE '^PUBLIC_BASE_URL = "https' wrangler.toml; then

@@ -28,3 +28,5 @@ python3 main.py "a walking cat"
 <p>"an orange frog" on Sep 13, 2026 by claude-opus-5</p> <p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/5fa3dd05-e712-4306-aadf-530e56ce6b33.gif" alt="sprightly output: an orange frog" width="128"></p>
 
 <p>"a green fox looking up and down" on Sep 13, 2026 by claude-opus-5 (1m03s, $0.14)</p> <p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/0d862be8-7343-4495-8630-1c91171232c6.gif" alt="sprightly output: a green fox looking up and down" width="128"></p>
+
+<p>"fire" on Sep 13, 2026 by claude-opus-5 (0m47s, $0.10)</p> <p><img src="examples/fire.gif" alt="sprightly output: a green fox looking up and down" width="128"></p>

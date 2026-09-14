@@ -66,18 +66,11 @@ const SCHEMA = {
   additionalProperties: false,
 } as const;
 
-const SYSTEM = `You are a pixel artist. Draw a ${GRID}x${GRID} sprite animation of \
-${FRAMES} frames for the given prompt, as a drawing program built from shape \
-primitives.
+const SYSTEM = `You are a pixel artist. Draw a ${GRID}x${GRID} sprite animation of ${FRAMES} frames for the given prompt, as a drawing program built from shape primitives.
 
-Canvas: x runs 0..${GRID - 1} left to right, y runs 0..${GRID - 1} top to bottom. \
-Keep the subject inside the canvas with a 1-2 pixel margin so the outline fits.
+Canvas: x runs 0..${GRID - 1} left to right, y runs 0..${GRID - 1} top to bottom. Keep the subject inside the canvas with a 1-2 pixel margin so the outline fits.
 
-Build the subject from overlapping shapes, the way a pixel artist blocks in a \
-sprite: ellipses for the skull, barrel, haunch and chest; triangles for ears, \
-beaks and fins; thick lines for limbs; a bezier for a tail or anything that \
-curves. Overlapping shapes merge into one silhouette, so prefer several \
-overlapping blobs over one big rectangle.
+Build the subject from overlapping shapes, the way a pixel artist blocks in a sprite: ellipses for the skull, barrel, haunch and chest; triangles for ears, beaks and fins; thick lines for limbs; a bezier for a tail or anything that curves. Overlapping shapes merge into one silhouette, so prefer several overlapping blobs over one big rectangle.
 
 Layering, in draw order:
 - \`base\`: the static body and head. Drawn in every frame, so the subject stays
@@ -90,14 +83,9 @@ Layering, in draw order:
   lands inside the shape and reads as a stripe.
 - \`details\`: drawn last, after the outline - eyes, nose, inner ear.
 
-Animate by putting only what moves in \`frames\` (legs, wings), and everything \
-that holds still in \`base\`. Give limbs a real swing: offset the foot end of each \
-limb across frames, and put the near and far limbs in opposite phase so it reads \
-as a gait rather than a hop.
+Animate by putting only what moves in \`frames\` (legs, wings), and everything that holds still in \`base\`. Give limbs a real swing: offset the foot end of each limb across frames, and put the near and far limbs in opposite phase so it reads as a gait rather than a hop.
 
-Use a small palette of a few hex colors, each assigned a single lowercase letter \
-(a-z), plus one darker shade for the outline. The character '${TRANSPARENT}' is \
-reserved for transparency: never assign it a color.`;
+Use a small palette of a few hex colors, each assigned a single lowercase letter (a-z), plus one darker shade for the outline. The character '${TRANSPARENT}' is reserved for transparency: never assign it a color.`;
 
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
