@@ -67,3 +67,6 @@ if output_path:
     with open(output_path, "a") as f:
         f.write(f"gif_url={gif_url}\n")
         f.write(f"prompt={PROMPT}\n")
+        f.write(f"model={result['model']}\n")
+        f.write(f"elapsed_ms={result['elapsed_ms']}\n")
+        f.write(f"cost_usd={result['cost_usd']}\n")

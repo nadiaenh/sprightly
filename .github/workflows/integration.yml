@@ -30,7 +30,7 @@ jobs:
       - name: Record this week's demo in the README
         if: steps.generate.outputs.gif_url != ''
         run: |
-          python scripts/update_demo.py "${{ steps.generate.outputs.gif_url }}" "${{ steps.generate.outputs.prompt }}"
+          python scripts/update_demo.py "${{ steps.generate.outputs.gif_url }}" "${{ steps.generate.outputs.prompt }}" "${{ steps.generate.outputs.model }}" "${{ steps.generate.outputs.elapsed_ms }}" "${{ steps.generate.outputs.cost_usd }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git diff --quiet README.md || {
