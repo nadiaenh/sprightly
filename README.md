@@ -36,3 +36,6 @@ Image generation takes ~1min and costs ~$0.30 on average.
 8-frame animations, up to 3 attempts using visual verification.
 
 <img src="examples/lantern.gif" alt="sprightly output: a lantern" width="128"> <img src="examples/threadmill.gif" alt="sprightly output: a snake" width="128"> <img src="examples/sockpuppet.gif" alt="sprightly output: a sock puppet" width="128"> <img src="examples/cinders.gif" alt="sprightly output: cinderella" width="128"> <img src="examples/fairy.gif" alt="sprightly output: a fairy" width="128"> <img src="examples/furnace.gif" alt="sprightly output: a furnace" width="128"> <img src="examples/headwind.gif" alt="sprightly output: a wind rotater" width="128">
+
+<p>"a orange dog walking" on Sep 14, 2026 by claude-opus-5 (0m42s, $0.19)</p>
+<p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/66cd4e21-d995-4349-ba0c-912d9841b132.gif" alt="sprightly output: a orange dog walking" width="128"></p>
