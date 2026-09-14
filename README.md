@@ -2,7 +2,7 @@
 
 **sprightly** is a lightweight service that generates animated pixel art GIF's from a short prompt. The service runs on Cloudflare Workers and the images are saved to Cloudflare R2.
 
-<p align="center"><img src="examples/cat.gif" alt="A pixel art cat walking" width="256"></p>
+<p align="center"><img src="examples/fairy.gif" alt="A pixel art fairy" width="256"></p>
 
 ## Setup
 
