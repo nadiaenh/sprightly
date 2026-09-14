@@ -50,7 +50,8 @@ with post(PROMPT, API_KEY) as response:
 gif_url = result["url"]
 print(f"ok: generated {gif_url}")
 
-with urllib.request.urlopen(gif_url) as response:
+gif_request = urllib.request.Request(gif_url, headers={"user-agent": "sprightly/0.1"})
+with urllib.request.urlopen(gif_request) as response:
     body = response.read()
 
 if not body.startswith(b"GIF89a"):
