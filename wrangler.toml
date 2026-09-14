@@ -3,6 +3,11 @@ main = "worker/index.ts"
 compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
+[[rules]]
+type = "Text"
+globs = ["**/*.txt"]
+fallthrough = true
+
 # Public R2 URL that generated GIFs are served from. setup.sh fills this in
 # after enabling public access on the bucket.
 [vars]

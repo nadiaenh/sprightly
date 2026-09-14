@@ -10,19 +10,23 @@ Emitting shapes rather than raw pixels keeps the output ~20x smaller, keeps
 the subject consistent across frames (the body is drawn once, in `base`),
 and makes row-length drift impossible.
 """
+
 import argparse
+import base64
+import io
 import json
 import os
 import sys
 import time
+from pathlib import Path
 
 from PIL import Image
 
-GRID = 32           # NxN pixels per frame
-FRAMES = 4          # sprite sheet length
-SCALE = 12          # upscale factor for viewability
-FRAME_MS = 160      # ms per frame in the GIF
-TRANSPARENT = "."   # reserved: never a palette color
+GRID = 32  # NxN pixels per frame
+FRAMES = 8  # sprite sheet length
+SCALE = 12  # upscale factor for viewability
+FRAME_MS = 160  # ms per frame in the GIF
+TRANSPARENT = "."  # reserved: never a palette color
 
 MODEL = "claude-opus-5"
 PRICE_PER_MTOK = {"claude-opus-5": (5.00, 25.00)}  # (input, output) $/million tokens
@@ -108,28 +112,16 @@ SCHEMA = {
     "additionalProperties": False,
 }
 
-SYSTEM = f"""You are a pixel artist. Draw a {GRID}x{GRID} sprite animation of {FRAMES} frames for the given prompt, as a drawing program built from shape primitives.
+def _load_system_prompt():
+    template = (Path(__file__).parent / "prompt.txt").read_text()
+    return (
+        template.replace("{{GRID}}", str(GRID))
+        .replace("{{GRID_MAX}}", str(GRID - 1))
+        .replace("{{FRAMES}}", str(FRAMES))
+    )
 
-Canvas: x runs 0..{GRID - 1} left to right, y runs 0..{GRID - 1} top to bottom. Keep the subject inside the canvas with a 1-2 pixel margin so the outline fits.
 
-Build the subject from overlapping shapes, the way a pixel artist blocks in a sprite: ellipses for the skull, barrel, haunch and chest; triangles for ears, beaks and fins; thick lines for limbs; a bezier for a tail or anything that curves. Overlapping shapes merge into one silhouette, so prefer several overlapping blobs over one big rectangle.
-
-Layering, in draw order:
-- `base`: the static body and head. Drawn in every frame, so the subject stays
-  identical frame to frame.
-- `frames[i].behind`: drawn UNDER the base - far-side limbs, a tail passing
-  behind the body.
-- `frames[i].front`: drawn OVER the base - near-side limbs.
-- The outline is then computed automatically by dilating the silhouette, in the
-  `outline` palette color. Never draw the outline yourself: a hand-drawn outline
-  lands inside the shape and reads as a stripe.
-- `details`: drawn last, after the outline - eyes, nose, inner ear.
-
-Animate by putting only what moves in `frames` (legs, wings), and everything that holds still in `base`. Give limbs a real swing: offset the foot end of each limb across frames, and put the near and far limbs in opposite phase so it reads as a gait rather than a hop.
-
-Style: cute chibi, not realistic. The head is oversized - 40-60% of the subject's height - sitting on a small, stubby, rounded body; limbs are short and thick, never thin sticks. Pick whichever facing reads best for the subject and its animation - front-facing, three-quarters, or a clean side profile for something that walks or runs - and keep it centered in the frame. In `details`, give it one or two big round eyes (one if in profile, each 2-3px across) with a single 1px white highlight dot offset toward one corner, and a small blush oval in a soft pink on each cheek. Keep every shape rounded - prefer ellipses over rects and square corners.
-
-Use a small palette of 4-6 hex colors, each assigned a single lowercase letter (a-z), plus one darker shade for the outline. Favor soft, saturated, harmonious colors (pastels or clean flat tones) over muddy or clashing ones, and always include a light pink for the blush. The character '{TRANSPARENT}' is reserved for transparency: never assign it a color."""
+SYSTEM = _load_system_prompt()
 
 
 def _blank():
@@ -160,8 +152,14 @@ def _triangle(grid, ax, ay, lx, ly, rx, ry, ch):
     steps = max(1, int(round(max(abs(ly - ay), abs(ry - ay)))))
     for i in range(steps + 1):
         t = i / steps
-        _rect(grid, ax + (lx - ax) * t, ay + (ly - ay) * t,
-              ax + (rx - ax) * t, ay + (ry - ay) * t, ch)
+        _rect(
+            grid,
+            ax + (lx - ax) * t,
+            ay + (ly - ay) * t,
+            ax + (rx - ax) * t,
+            ay + (ry - ay) * t,
+            ch,
+        )
 
 
 def _line(grid, x0, y0, x1, y1, width, ch):
@@ -194,6 +192,8 @@ _HANDLERS = {
 def draw_ops(grid, ops):
     """Execute a list of shape ops onto the grid, skipping malformed ones."""
     for op in ops:
+        if not isinstance(op, dict):
+            continue
         handler = _HANDLERS.get(op.get("type"))
         color = op.get("color") or ""
         points = op.get("points") or []
@@ -226,7 +226,9 @@ def outline_grid(grid, ch):
     snapshot = [row[:] for row in grid]
     for y in range(GRID):
         for x in range(GRID):
-            if snapshot[y][x] == TRANSPARENT and _touches_silhouette(snapshot, x, y, ch):
+            if snapshot[y][x] == TRANSPARENT and _touches_silhouette(
+                snapshot, x, y, ch
+            ):
                 grid[y][x] = ch
 
 
@@ -275,26 +277,118 @@ def frames_to_gif(palette, frames, path):
     )
 
 
+MAX_DRAFTS = 3
+
+PREVIEW_TOOL = {
+    "name": "preview",
+    "description": (
+        "Render the current draft as a pixel-art image so you can check it "
+        "before deciding whether to submit. Calling this uses up one of "
+        "your limited drafts."
+    ),
+    "input_schema": SCHEMA,
+}
+
+SUBMIT_TOOL = {
+    "name": "submit",
+    "description": "Finalize and submit the drawing program. This ends the task.",
+    "input_schema": SCHEMA,
+}
+
+
+def _first_frame_gif_bytes(program):
+    """Render just the first frame, for the model's preview tool call."""
+    palette = palette_of(program)
+    frame = render_program(program)[0]
+    img = Image.new("RGBA", (GRID, GRID), (0, 0, 0, 0))
+    for y, row in enumerate(frame):
+        for x, char in enumerate(row):
+            if char == TRANSPARENT or char not in palette:
+                continue
+            hex_color = palette[char].lstrip("#")
+            r, g, b = (int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+            img.putpixel((x, y), (r, g, b, 255))
+    img = img.resize((GRID * SCALE, GRID * SCALE), Image.NEAREST)
+    buf = io.BytesIO()
+    img.save(buf, format="GIF")
+    return buf.getvalue()
+
+
 def generate_program(prompt):
     import anthropic
 
     client = anthropic.Anthropic()
     start = time.time()
-    with client.messages.stream(
-        model=MODEL,
-        max_tokens=50000,
-        system=SYSTEM,
-        messages=[{"role": "user", "content": prompt}],
-        output_config={"format": {"type": "json_schema", "schema": SCHEMA}},
-    ) as stream:
-        response = stream.get_final_message()
+    messages = [{"role": "user", "content": prompt}]
+    total_in = total_out = 0
+    draft_count = 0
+    final_program = None
+
+    while final_program is None:
+        allow_preview = draft_count < MAX_DRAFTS - 1
+        tools = [PREVIEW_TOOL, SUBMIT_TOOL] if allow_preview else [SUBMIT_TOOL]
+
+        with client.messages.stream(
+            model=MODEL,
+            max_tokens=50000,
+            system=SYSTEM,
+            messages=messages,
+            tools=tools,
+            tool_choice={"type": "any"},
+        ) as stream:
+            response = stream.get_final_message()
+        total_in += response.usage.input_tokens
+        total_out += response.usage.output_tokens
+
+        tool_uses = [b for b in response.content if b.type == "tool_use"]
+        if not tool_uses:
+            raise RuntimeError("model returned no tool call")
+
+        messages.append({"role": "assistant", "content": response.content})
+
+        submit_use = next((b for b in tool_uses if b.name == "submit"), None)
+        if submit_use is not None:
+            final_program = submit_use.input
+            break
+
+        # Every tool_use block needs a matching tool_result before the next
+        # request, so respond to all preview calls in this turn, not just one.
+        result_blocks = []
+        for tool_use in tool_uses:
+            draft_count += 1
+            gif_b64 = base64.b64encode(
+                _first_frame_gif_bytes(tool_use.input)
+            ).decode()
+            is_last_preview = draft_count >= MAX_DRAFTS - 1
+            note = (
+                "This was your last preview. Call submit with your final program next."
+                if is_last_preview
+                else "Here is your draft rendered. Call submit if it's good, or "
+                "call preview again with a revised program."
+            )
+            result_blocks.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tool_use.id,
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/gif",
+                                "data": gif_b64,
+                            },
+                        },
+                        {"type": "text", "text": note},
+                    ],
+                }
+            )
+        messages.append({"role": "user", "content": result_blocks})
+
     elapsed_ms = (time.time() - start) * 1000
-    text = next(b.text for b in response.content if b.type == "text")
     price_in, price_out = PRICE_PER_MTOK[MODEL]
-    cost_usd = (
-        response.usage.input_tokens * price_in + response.usage.output_tokens * price_out
-    ) / 1_000_000
-    return json.loads(text), {"elapsed_ms": elapsed_ms, "cost_usd": cost_usd}
+    cost_usd = (total_in * price_in + total_out * price_out) / 1_000_000
+    return final_program, {"elapsed_ms": elapsed_ms, "cost_usd": cost_usd}
 
 
 def print_summary(elapsed_ms, model, cost_usd, output):
@@ -338,7 +432,9 @@ def run_remote(prompt, url, api_key):
 
 def main():
     parser = argparse.ArgumentParser(description="Prompt -> pixel-art GIF")
-    parser.add_argument("prompt", help="what to draw, or a .json program with --program")
+    parser.add_argument(
+        "prompt", help="what to draw, or a .json program with --program"
+    )
     parser.add_argument("output", nargs="?", default="sprite.gif")
     parser.add_argument(
         "--local",

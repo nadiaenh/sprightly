@@ -105,7 +105,7 @@ const HANDLERS: Record<Op["type"], { minPoints: number; render: Renderer }> = {
 };
 
 function isDrawable(op: Op | undefined, handler: { minPoints: number } | undefined): boolean {
-  if (!op || !handler) return false;
+  if (!op || typeof op !== "object" || !handler) return false;
   const color = op.color ?? "";
   const points = op.points ?? [];
   return !!color && color !== TRANSPARENT && points.length >= handler.minPoints;

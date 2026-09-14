@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { GIFEncoder } from "gifenc";
 import { FRAMES, GRID, TRANSPARENT, renderProgram, type Program } from "./draw";
+import PROMPT_TEMPLATE from "../prompt.txt";
 
 const SCALE = 12;
 const FRAME_MS = 160;
@@ -66,26 +67,9 @@ const SCHEMA = {
   additionalProperties: false,
 } as const;
 
-const SYSTEM = `You are a pixel artist. Draw a ${GRID}x${GRID} sprite animation of ${FRAMES} frames for the given prompt, as a drawing program built from shape primitives.
-
-Canvas: x runs 0..${GRID - 1} left to right, y runs 0..${GRID - 1} top to bottom. Keep the subject inside the canvas with a 1-2 pixel margin so the outline fits.
-
-Build the subject from overlapping shapes, the way a pixel artist blocks in a sprite: ellipses for the skull, barrel, haunch and chest; triangles for ears, beaks and fins; thick lines for limbs; a bezier for a tail or anything that curves. Overlapping shapes merge into one silhouette, so prefer several overlapping blobs over one big rectangle.
-
-Layering, in draw order:
-- \`base\`: the static body and head. Drawn in every frame, so the subject stays
-  identical frame to frame.
-- \`frames[i].behind\`: drawn UNDER the base - far-side limbs, a tail passing
-  behind the body.
-- \`frames[i].front\`: drawn OVER the base - near-side limbs.
-- The outline is then computed automatically by dilating the silhouette, in the
-  \`outline\` palette color. Never draw the outline yourself: a hand-drawn outline
-  lands inside the shape and reads as a stripe.
-- \`details\`: drawn last, after the outline - eyes, nose, inner ear.
-
-Animate by putting only what moves in \`frames\` (legs, wings), and everything that holds still in \`base\`. Give limbs a real swing: offset the foot end of each limb across frames, and put the near and far limbs in opposite phase so it reads as a gait rather than a hop.
-
-Use a small palette of a few hex colors, each assigned a single lowercase letter (a-z), plus one darker shade for the outline. The character '${TRANSPARENT}' is reserved for transparency: never assign it a color.`;
+const SYSTEM = PROMPT_TEMPLATE.replace(/\{\{GRID\}\}/g, String(GRID))
+  .replace(/\{\{GRID_MAX\}\}/g, String(GRID - 1))
+  .replace(/\{\{FRAMES\}\}/g, String(FRAMES));
 
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -146,25 +130,111 @@ interface GenerateResult {
   costUsd: number;
 }
 
+const MAX_DRAFTS = 3;
+
+const PREVIEW_TOOL = {
+  name: "preview",
+  description:
+    "Render the current draft as a pixel-art image so you can check it before deciding whether to submit. Calling this uses up one of your limited drafts.",
+  input_schema: SCHEMA,
+};
+
+const SUBMIT_TOOL = {
+  name: "submit",
+  description: "Finalize and submit the drawing program. This ends the task.",
+  input_schema: SCHEMA,
+};
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
+}
+
+function firstFramePreviewGif(program: Program): Uint8Array {
+  const { colors, indexOf } = buildPalette(program);
+  const size = GRID * SCALE;
+  const gif = GIFEncoder();
+  const frame = renderProgram(program)[0];
+  if (frame) {
+    gif.writeFrame(upscale(frame, indexOf, size), size, size, {
+      palette: colors,
+      transparent: true,
+      transparentIndex: TRANSPARENT_INDEX,
+    });
+  }
+  gif.finish();
+  return gif.bytes();
+}
+
 async function generate(prompt: string, env: Env): Promise<GenerateResult> {
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const start = Date.now();
-  const stream = client.messages.stream({
-    model: MODEL,
-    max_tokens: 50000,
-    system: SYSTEM,
-    messages: [{ role: "user", content: prompt }],
-    output_config: { format: { type: "json_schema", schema: SCHEMA } },
-  } as any);
-  const message = await stream.finalMessage();
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  const messages: any[] = [{ role: "user", content: prompt }];
+  let draftCount = 0;
+  let finalProgram: Program | null = null;
+
+  while (!finalProgram) {
+    const allowPreview = draftCount < MAX_DRAFTS - 1;
+    const tools = allowPreview ? [PREVIEW_TOOL, SUBMIT_TOOL] : [SUBMIT_TOOL];
+
+    const stream = client.messages.stream({
+      model: MODEL,
+      max_tokens: 50000,
+      system: SYSTEM,
+      messages,
+      tools,
+      tool_choice: { type: "any" },
+    } as any);
+    const message = await stream.finalMessage();
+
+    totalInputTokens += message.usage.input_tokens;
+    totalOutputTokens += message.usage.output_tokens;
+
+    const toolUses = message.content.filter((b: any) => b.type === "tool_use") as any[];
+    if (toolUses.length === 0) throw new Error("model returned no tool call");
+
+    messages.push({ role: "assistant", content: message.content });
+
+    const submitUse = toolUses.find((b) => b.name === "submit");
+    if (submitUse) {
+      finalProgram = submitUse.input as Program;
+      break;
+    }
+
+    // Every tool_use block needs a matching tool_result before the next
+    // request, so respond to all preview calls in this turn, not just one.
+    const resultBlocks = toolUses.map((toolUse) => {
+      draftCount++;
+      const gifBytes = firstFramePreviewGif(toolUse.input as Program);
+      const isLastPreview = draftCount >= MAX_DRAFTS - 1;
+      return {
+        type: "tool_result",
+        tool_use_id: toolUse.id,
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/gif", data: toBase64(gifBytes) },
+          },
+          {
+            type: "text",
+            text: isLastPreview
+              ? "This was your last preview. Call submit with your final program next."
+              : "Here is your draft rendered. Call submit if it's good, or call preview again with a revised program.",
+          },
+        ],
+      };
+    });
+    messages.push({ role: "user", content: resultBlocks });
+  }
+
   const elapsedMs = Date.now() - start;
-  const block = message.content.find((b: any) => b.type === "text");
-  if (!block) throw new Error("model returned no text block");
-  const program = JSON.parse((block as any).text) as Program;
-  const { input_tokens, output_tokens } = message.usage;
   const costUsd =
-    (input_tokens * PRICE_PER_MTOK_INPUT + output_tokens * PRICE_PER_MTOK_OUTPUT) / 1_000_000;
-  return { program, elapsedMs, costUsd };
+    (totalInputTokens * PRICE_PER_MTOK_INPUT + totalOutputTokens * PRICE_PER_MTOK_OUTPUT) /
+    1_000_000;
+  return { program: finalProgram, elapsedMs, costUsd };
 }
 
 export default {
