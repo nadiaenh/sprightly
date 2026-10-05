@@ -45,3 +45,6 @@ Image generation takes ~1min and costs ~$0.30 on average.
 
 <p>"a orange fox waving hello" on Sep 28, 2026 by claude-opus-5 (0m47s, $0.21)</p>
 <p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/9f6d40ce-5749-4ca4-a4d1-60cc28ea2c3a.gif" alt="sprightly output: a orange fox waving hello" width="128"></p>
+
+<p>"a pink dog looking up and down" on Oct 05, 2026 by claude-opus-5 (0m51s, $0.23)</p>
+<p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/2b2d4b22-4e8a-4117-8a33-83de3b71487b.gif" alt="sprightly output: a pink dog looking up and down" width="128"></p>
