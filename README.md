@@ -48,3 +48,6 @@ Image generation takes ~1min and costs ~$0.30 on average.
 
 <p>"a pink dog looking up and down" on Oct 05, 2026 by claude-opus-5 (0m51s, $0.23)</p>
 <p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/2b2d4b22-4e8a-4117-8a33-83de3b71487b.gif" alt="sprightly output: a pink dog looking up and down" width="128"></p>
+
+<p>"a green dolphin walking" on Oct 12, 2026 by claude-opus-5 (0m39s, $0.18)</p>
+<p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/b1028ac4-a872-4869-b6d2-14e91a84b868.gif" alt="sprightly output: a green dolphin walking" width="128"></p>
