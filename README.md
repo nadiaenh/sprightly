@@ -57,3 +57,6 @@ Image generation takes ~1min and costs ~$0.30 on average.
 
 <p>"a orange frog walking" on Oct 26, 2026 by claude-opus-5 (0m53s, $0.23)</p>
 <p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/405c6757-8b3b-47ed-8639-d766c60ebe92.gif" alt="sprightly output: a orange frog walking" width="128"></p>
+
+<p>"a orange cat looking up and down" on Nov 02, 2026 by claude-opus-5 (1m12s, $0.28)</p>
+<p><img src="https://pub-04c53b629290498c9ca208af58491e0b.r2.dev/77553fe8-61cc-476d-b44f-d21d9dbdb6f5.gif" alt="sprightly output: a orange cat looking up and down" width="128"></p>
